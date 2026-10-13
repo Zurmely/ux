@@ -1,0 +1,145 @@
+# UX multi-agent team: specialist registry
+# Used during first-time setup to enable or disable specialists. The Chief is always on.
+# Tool names follow tools/grok-bot.md as "Namespace.tool_name".
+#   tools.required: the specialist can't do its core job without these namespaces.
+#   tools.optional: they make the work better; if they're missing, the specialist falls back and says so.
+#   required_skills: host skills to load before the matching tools (see tools/grok-bot.md).
+
+version: 2
+host: grok-bot
+tool_catalog: tools/grok-bot.md
+
+orchestrator:
+  id: chief-ux-designer
+  name: Chief UX Designer
+  description: >-
+    Orchestrates the UX team, briefs specialists, reconciles outputs, and
+    produces the final design deliverable and handoff.
+  always_enabled: true
+  skill_path: chief-ux-designer/SKILL.md
+  tools:
+    required: [cursor, Google-drive, figma]
+    optional: [Notion, Google-slides, Github, Gmail, cursor-subscriptions, Slack]
+    key: [cursor.Task, cursor.TodoWrite, Google-drive.create_file, figma.use_figma, Google-slides.compose_slide, Github.issue_write]
+  required_skills: [figma-use, figma-generate-diagram]
+  activities: [C1-intake, C2-engagement-brief, C3-dispatch, C4-collect, C5-reconcile, C6-re-dispatch, C7-final-file, C8-review-deck, C9-handoff, C10-follow-through]
+
+onboarding:
+  skill_path: onboarding/SKILL.md
+  selection_prompt: >-
+    Choose which specialist agents to create for this workspace. The Chief UX
+    Designer is always available. Disabled specialists are not invoked until
+    you enable them and re-run setup.
+
+specialists:
+  - id: ux-writer
+    name: UX Writer
+    description: >-
+      Content strategy, voice and tone, UI copy, error messages, onboarding
+      text, and documentation that supports the product experience.
+    default_enabled: true
+    skill_path: specialists/ux-writer/SKILL.md
+    sub_skills:
+      - specialists/ux-writer/skills/voice-and-tone/SKILL.md
+      - specialists/ux-writer/skills/ui-copy/SKILL.md
+      - specialists/ux-writer/skills/content-strategy/SKILL.md
+    tools:
+      required: [figma, Google-drive]
+      optional: [Notion, X, Github, cursor]
+      key: [figma.get_metadata, figma.get_screenshot, figma.use_figma, Google-drive.create_file, X.search_posts_all, Github.search_code]
+    required_skills: [figma-use, figma-design-to-code, x-api-mcp-guide]
+    activities: [W1-copy-inventory, W2-voice-check, W3-user-vocabulary, W4-draft-in-context, W5-errors-and-empty-states, W6-apply-to-figma, W7-package]
+
+  - id: motion-designer
+    name: Motion Designer
+    description: >-
+      Motion principles, transitions, loading and feedback animation, and
+      specs that UI and engineering can implement, authored and exported in Figma.
+    default_enabled: true
+    skill_path: specialists/motion-designer/SKILL.md
+    sub_skills:
+      - specialists/motion-designer/skills/motion-spec/SKILL.md
+      - specialists/motion-designer/skills/micro-interactions/SKILL.md
+    tools:
+      required: [figma, Google-drive]
+      optional: [cursor]
+      key: [figma.get_motion_context, figma.use_figma, figma.export_video, figma.get_variable_defs, Google-drive.create_file]
+    required_skills: [figma-use, figma-use-motion, figma-implement-motion]
+    activities: [M1-motion-audit, M2-tokens, M3-author-motion, M4-reduced-motion-variants, M5-review-export, M6-spec, M7-a11y-sync]
+
+  - id: illustrator
+    name: Illustrator
+    description: >-
+      Custom illustration, iconography direction, empty states, marketing
+      spots, and visual narrative aligned to brand.
+    default_enabled: true
+    skill_path: specialists/illustrator/SKILL.md
+    sub_skills:
+      - specialists/illustrator/skills/iconography/SKILL.md
+      - specialists/illustrator/skills/spot-illustration/SKILL.md
+    tools:
+      required: [figma]
+      optional: [Google-drive, cursor]
+      key: [figma.search_design_system, figma.use_figma, figma.generate_image, figma.weave_run_model, figma.create_shader, figma.upload_assets, figma.download_assets]
+    required_skills: [figma-use, figma-shaders]
+    paid_tools: [figma.generate_image, figma.weave_run_model]  # need user consent and planKey
+    activities: [I1-asset-audit, I2-art-direction, I3-concepts, I4-production, I5-icon-set, I6-export]
+
+  - id: ui-designer
+    name: UI Designer
+    description: >-
+      Visual UI, layout, components, interaction patterns, prototypes, and
+      design-system work (tokens, components, documentation, Code Connect).
+    default_enabled: true
+    skill_path: specialists/ui-designer/SKILL.md
+    sub_skills:
+      - specialists/ui-designer/skills/visual-ui/SKILL.md
+      - specialists/ui-designer/skills/interaction-design/SKILL.md
+      - specialists/ui-designer/skills/prototyping/SKILL.md
+      - specialists/ui-designer/skills/design-systems/SKILL.md
+    tools:
+      required: [figma, Google-drive]
+      optional: [Github, cursor]
+      key: [figma.create_session, figma.search_design_system, figma.use_figma, figma.generate_figma_design, figma.generate_diagram, figma.get_design_context, figma.send_code_connect_mappings]
+    required_skills: [figma-use, figma-generate-design, figma-generate-library, figma-create-new-file, figma-generate-diagram, figma-design-to-code, figma-code-connect]
+    activities: [U1-setup, U2-baseline, U3-flow-map, U4-screens, U5-prototype, U6-system-deltas, U7-integrate, U8-self-qa]
+
+  - id: ux-researcher
+    name: UX Researcher
+    description: >-
+      Research planning, interviews, usability tests, synthesis, personas,
+      journey maps, and evidence for design decisions (docs in Google Drive).
+    default_enabled: true
+    skill_path: specialists/ux-researcher/SKILL.md
+    sub_skills:
+      - specialists/ux-researcher/skills/research-plan/SKILL.md
+      - specialists/ux-researcher/skills/usability-testing/SKILL.md
+      - specialists/ux-researcher/skills/synthesis/SKILL.md
+    tools:
+      required: [Google-drive]
+      optional: [Notion, Gmail, Github, X, cursor, figma, Google-slides]
+      key: [Google-drive.search_files, Notion.notion-query-meeting-notes, Gmail.search_threads, X.search_posts_all, cursor.WebSearch, figma.generate_diagram, Google-slides.compose_slide]
+    required_skills: [x-api-mcp-guide, figma-use, figma-use-figjam, figma-generate-diagram]
+    approval_required: [Gmail.create_draft]  # the user sends outreach
+    activities: [R1-desk-research, R2-market-and-social-listening, R3-plan, R4-recruit, R5-fieldwork, R6-synthesis, R7-readout, R8-package]
+
+  - id: accessibility-specialist
+    name: Accessibility Specialist
+    description: >-
+      WCAG-oriented audits, inclusive patterns, remediation specs, and
+      acceptance criteria so shipped UI meets accessibility goals.
+    default_enabled: true
+    skill_path: specialists/accessibility-specialist/SKILL.md
+    sub_skills:
+      - specialists/accessibility-specialist/skills/audit/SKILL.md
+      - specialists/accessibility-specialist/skills/inclusive-patterns/SKILL.md
+    tools:
+      required: [figma, Google-slides, Google-drive]
+      optional: [Github, cursor]
+      key: [figma.get_variable_defs, Google-slides.check_contrast, figma.get_design_context, figma.get_motion_context, figma.use_figma, cursor.WebFetch, Github.issue_write]
+    required_skills: [figma-use, figma-design-to-code]
+    approval_required: [Github.issue_write]
+    activities: [A1-scope, A2-contrast-pass, A3-structure-pass, A4-keyboard-and-focus, A5-motion-pass, A6-annotate, A7-report, A8-tickets]
+
+# After selection, save the enabled ids (adapt the path to your agent host):
+# .ux-team/enabled-specialists.json -> { "enabled_specialists": ["ux-writer", "ui-designer", ...] }
