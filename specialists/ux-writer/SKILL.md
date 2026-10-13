@@ -37,6 +37,34 @@ Make the product **understandable, consistent, and trustworthy** through languag
 | String inventory | Sheet with IDs | Matches Figma frame / component names |
 | Content risks | Short list | Legal, i18n length, sensitive topics |
 
+## Tools on Grok Bot
+
+See `tools/grok-bot.md` for the full catalog and required skills.
+
+| Tool | Purpose |
+| --- | --- |
+| `figma.create_session`, `get_metadata` | List every text layer and frame name in scope |
+| `figma.get_design_context` (load `figma-design-to-code`), `get_screenshot` | Read the copy in context and see the space it gets |
+| `figma.use_figma` (load `figma-use`) | Write approved copy into text layers, and add copy annotations |
+| `Google-drive.copy_file`, `create_file`, `read_file_content` | Create the copy deck from the template, and read the brand and voice guide |
+| `Notion.notion-search`, `notion-fetch` | Find existing glossary, naming, or legal guidance |
+| `Notion.notion-create-database` | Set up a terminology glossary database (for a content-strategy engagement) |
+| `X.search_posts_all` | Research the words real users use for the product's concepts (public reads) |
+| `cursor.WebSearch`, `WebFetch` | Check competitor copy conventions and platform style guides |
+| `Github.search_code`, `get_file_contents` | Find existing string files (i18n JSON, constants) so copy IDs line up |
+
+## Activities
+
+| # | Activity | Steps and tools |
+| --- | --- | --- |
+| W1 | **Copy inventory** | `figma.get_metadata` on in-scope pages. Pull text nodes into the copy deck with IDs `flow.screen.element`. If strings already exist, use `Github.search_code` to match them |
+| W2 | **Voice check** | `Google-drive.read_file_content` on the brand guide. If none exists, run `skills/voice-and-tone` |
+| W3 | **User vocabulary** | `X.search_posts_all` on product and domain terms, plus the Researcher's insight summary. Record preferred and avoided terms |
+| W4 | **Draft in context** | `figma.get_screenshot` per screen, then draft in the copy deck. Flag overflow against the frame width |
+| W5 | **Errors and empty states** | Write every system message using the problem-plus-action pattern. Cross-check the UI Designer's interaction table so no state is missed |
+| W6 | **Apply to Figma** | After Chief approval, `figma.use_figma` updates text layers by node ID. Never rename layers, because the a11y and spec sheets refer to them |
+| W7 | **Package** | Create the copy deck in Drive and complete the handoff packet |
+
 ## Quality criteria
 
 - [ ] Every user-visible string has an ID and context (screen + element)

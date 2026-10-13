@@ -36,6 +36,33 @@ Design **meaningful motion** that orients users, shows causality, and reinforces
 | Prototype notes | Figma | Linked from spec |
 | Reduced-motion fallbacks | Spec table | Required per animation |
 
+## Tools on Grok Bot
+
+See `tools/grok-bot.md` for the full catalog and required skills.
+
+| Tool | Purpose |
+| --- | --- |
+| `figma.create_session`, `get_screenshot`, `get_metadata` | Look at the frames and layers that will animate |
+| `figma.get_motion_context` | Read the existing keyframes, easing curves, and generated CSS or motion.dev snippets |
+| `figma.use_figma` (load `figma-use` and `figma-use-motion`) | Author keyframes, easing, and timeline duration, plus prototype smart-animate transitions |
+| `figma.export_video` | Export a timeline node as an MP4 for review and the eng reference |
+| `figma.get_variable_defs` | Read existing duration and easing variables, if the system has them |
+| `figma-implement-motion` (skill) | Turn a Figma motion spec into eng-ready code notes |
+| `Google-drive.copy_file`, `create_file` | Create the motion spec from the template |
+| `cursor.WebFetch` | Look up platform motion guidance and the `prefers-reduced-motion` reference |
+
+## Activities
+
+| # | Activity | Steps and tools |
+| --- | --- | --- |
+| M1 | **Motion audit** | `figma.get_motion_context` on in-scope nodes to see what already moves. List gaps against the Chief's priority interactions |
+| M2 | **Tokens** | `figma.get_variable_defs`. Propose `duration.*` and `easing.*` tokens and send them to the UI Designer's design-systems sub-skill |
+| M3 | **Author motion** | `figma.use_figma` with the `figma-use-motion` guidance to build keyframes or smart-animate transitions on a dedicated "Motion" page |
+| M4 | **Reduced-motion variants** | For each animation, add a static or cross-fade variant frame next to it |
+| M5 | **Review export** | `figma.export_video` for each key sequence. Put the MP4 links in the spec |
+| M6 | **Spec** | Create the motion spec in Drive with every row filled. Use `get_motion_context` output as the CSS reference |
+| M7 | **A11y sync** | Send the reduced-motion table to the Accessibility Specialist through the Chief |
+
 ## Quality criteria
 
 - [ ] Every animation has **purpose** (feedback, continuity, delight—not decoration alone)

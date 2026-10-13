@@ -16,7 +16,14 @@ description: >-
 
 ## Tools
 
-Manual review primary; automated contrast check where values known. Tool-agnostic.
+On Grok Bot, see activities A1–A8 in the parent `SKILL.md`. The core loop is:
+
+1. `figma.get_variable_defs` to collect the hex values of text and fill tokens
+2. `Google-slides.check_contrast` to check up to 40 pairs per call (set `large: true` for text at 24pt or more, or bold at 19pt or more)
+3. `figma.get_design_context` for structure, labels, and target sizes
+4. `cursor.WebFetch` on the WCAG Understanding page for each criterion you cite
+
+Automated checks support manual review but don't replace it.
 
 ## Pairing
 

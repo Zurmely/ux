@@ -17,7 +17,7 @@ Introduce the **Chief UX Designer** + specialist model, load `specialists.manife
 
 1. Read `/specialists.manifest.yaml` at the repo root.
 2. Confirm **Chief UX Designer** is always enabled (`orchestrator.always_enabled: true`).
-3. List every entry under `specialists` with: name, one-line description, `suggested`, and `default_enabled`.
+3. List every entry under `specialists` with: name, one-line description, `default_enabled`, and its required tool namespaces.
 
 ## Specialist selection flow
 
@@ -41,15 +41,42 @@ Use a structured choice (e.g. multi-select questionnaire). Recommended defaults:
 3. **Enable specialists**: multi-select from manifest ids; pre-check all `default_enabled: true`.
 4. **Working agreement**: async specialist packets vs. parallel sprint; expected Chief deliverable (Figma link + decision log + handoff doc).
 
+## Tool readiness check (Grok Bot)
+
+After the user picks specialists, check each one's tools against the host. Run tool discovery (for example `GetDynamicTools`) and compare it with `tools.required` and `tools.optional` for each enabled entry in the manifest.
+
+| Result | What to do |
+| --- | --- |
+| All required namespaces ready | Enable the specialist |
+| A required namespace is missing or `needsAuth` | Warn the user, then either enable it in **degraded mode** (markdown deliverables only) or skip it. Tell the user to authenticate the integration in the Cursor desktop app |
+| An optional namespace is missing | Enable the specialist and note the skipped activities (for example, a Researcher without `X` skips R2 social listening) |
+
+Show the user a short readiness table, for example:
+
+| Specialist | Required | Optional missing | Status |
+| --- | --- | --- | --- |
+| UX Researcher | Google-drive ✓ | none | Ready |
+| Chief | cursor ✓, Google-drive ✓, figma ✓ | Slack (needs auth) | Ready, Slack check-ins off |
+
+Also confirm:
+
+- **Figma access.** `figma.whoami` returns the user's plans. Record the `planKey` if the Illustrator will use paid `figma.generate_image`.
+- **Drive root.** Create or choose `/<project>/` with `Google-drive.search_files` or `create_file`, and save its ID in the config.
+- **X.** Public reads are built into Grok Bot, so no connection is needed. Load `x-api-mcp-guide` before using any X tool.
+
 ## What happens after selection
 
 1. **Persist configuration** — Write enabled specialist ids to a workspace file your host understands, for example:
 
    ```json
    {
-     "version": 1,
+     "version": 2,
+     "host": "grok-bot",
      "orchestrator": "chief-ux-designer",
-     "enabled_specialists": ["ux-writer", "motion-designer", "illustrator", "ui-designer", "ux-researcher", "accessibility-specialist"]
+     "enabled_specialists": ["ux-writer", "motion-designer", "illustrator", "ui-designer", "ux-researcher", "accessibility-specialist"],
+     "degraded": { "ux-researcher": ["X"] },
+     "figma_plan_key": "team::1234567890",
+     "drive_root_folder_id": "<id>"
    }
    ```
 
@@ -76,6 +103,7 @@ When the user adds or removes a specialist later:
 Onboarding is complete when:
 
 - [ ] User understands Chief vs. specialists
+- [ ] Tool readiness table shown; degraded specialists recorded
 - [ ] Enabled list is persisted
 - [ ] Skill paths are registered for enabled roles only
 - [ ] Next step is agreed: discovery brief or first design task

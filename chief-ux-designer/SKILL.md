@@ -123,6 +123,60 @@ Send each specialist the **shared context block** plus a **role-specific ask**.
 4. **Integrate** — UI Designer merges copy/motion/a11y into frames; Chief reviews.
 5. **Decision log** — Any override of a specialist recommendation gets a row.
 
+## Tools on Grok Bot
+
+See `tools/grok-bot.md` for the full catalog, connection status, and required skills.
+
+| Tool | Purpose |
+| --- | --- |
+| `cursor.Task` | Launch each enabled specialist as a subagent. Its prompt is that specialist's `SKILL.md` plus the brief |
+| `cursor.TodoWrite` | Track the engagement plan, with one todo per specialist deliverable |
+| `Google-drive.search_files`, `read_file_content` | Find the existing brief, brand, and research docs |
+| `Google-drive.create_file`, `copy_file`, `update_file` | Create the engagement brief, decision log, reconciliation memo, and handoff summary |
+| `Notion.notion-search`, `notion-fetch` | Pull the product spec, roadmap, and past decisions |
+| `Notion.notion-create-pages`, `notion-update-page` | Publish the decision log when the team works in Notion |
+| `figma.create_session`, `get_metadata`, `get_screenshot` | Check final Figma structure and review specialist frames |
+| `figma.use_figma` (load `figma-use`) | Build the cover page, Figma index, and status labels for the final file |
+| `figma.generate_diagram` (load `figma-generate-diagram`) | Map the engagement or flows as a FigJam diagram |
+| `Google-slides.create_presentation`, `compose_slide`, `get_slide_thumbnail` | Build the stakeholder design review deck |
+| `Github.issue_write`, `sub_issue_write` | File eng handoff tickets, one parent and one sub-issue per flow (on request) |
+| `Gmail.create_draft` | Draft a stakeholder handoff email. Send only after approval |
+| `cursor-subscriptions.subscribe_timer`, `subscribe_github_pr` | Schedule check-ins and wait for implementation PRs |
+| `cursor-subscriptions.subscribe_slack_thread` | Wait for stakeholder feedback, if Slack is authenticated |
+
+## Activities
+
+| # | Activity | Steps and tools |
+| --- | --- | --- |
+| C1 | **Intake** | Read `enabled-specialists.json`. `Google-drive.search_files` and `Notion.notion-search` for prior context. `figma.create_session` plus `get_metadata` on any existing file |
+| C2 | **Engagement brief** | Fill the shared context block. `Google-drive.create_file` → `/<project>/00-engagement-brief`. `cursor.TodoWrite` with one item per deliverable |
+| C3 | **Dispatch** | One `cursor.Task` per enabled specialist, in a single message so they run in parallel. Put the shared context, the role ask, the specialist's skill path, and the required handoff template in the prompt. Researcher goes first when other roles depend on its insights |
+| C4 | **Collect** | Each subagent returns its handoff packet. Store it with `Google-drive.create_file` → `/<project>/specialist-outputs/<id>/`. Mark the todo done |
+| C5 | **Reconcile** | Inventory and gap analysis (below). `figma.get_screenshot` on integrated frames. Log each decision in the decision log (`Google-drive.update_file` or `Notion.notion-update-page`) |
+| C6 | **Re-dispatch** | Send each gap or conflict back to its owner with `cursor.Task` `resume` and a delta brief |
+| C7 | **Final file** | `figma.use_figma` builds the cover, index, and a "Ready for dev" status on each flow page |
+| C8 | **Review deck** | `Google-slides.create_presentation` and `compose_slide` for problem, insights, flows, decisions, and open questions. Check the result with `get_slide_thumbnail` |
+| C9 | **Handoff** | Complete `templates/handoff-checklist.md` in Drive. Optionally use `Github.issue_write` for eng tickets and `Gmail.create_draft` for the stakeholder note, both after approval |
+| C10 | **Follow-through** | `cursor-subscriptions.subscribe_github_pr` on the implementation PR, then a design QA pass with `figma.get_design_context` against the built UI |
+
+### Specialist dispatch prompt (for `cursor.Task`)
+
+```markdown
+You are the <Specialist Name> on a UX team led by the Chief UX Designer.
+Follow the skill at specialists/<id>/SKILL.md and its sub-skills.
+Tools: use only the tools listed in that skill's "Tools on Grok Bot" section,
+and load the required Figma skills before using Figma write tools.
+
+<shared context block>
+
+## Your ask
+<role-specific ask>
+
+## Return
+Your completed specialists/<id>/templates/handoff-packet.md, with Figma node
+URLs and Drive links. List any tool that was unavailable and what you did instead.
+```
+
 ## Quality criteria (Chief)
 
 - [ ] User goal achievable in primary flow without dead ends

@@ -2,7 +2,21 @@
 
 A **library of agent skills** for a multi-agent UX team. A **Chief UX Designer** orchestrates specialist agents; each specialist owns a slice of the experience and returns structured outputs the Chief reconciles into a final deliverable.
 
-Design work is expected in **Figma**; research, briefs, and decision logs in **Google Drive** (or equivalent). Skills are **tool-agnostic** beyond those conventions.
+Design work happens in **Figma**. Research, briefs, and decision logs live in **Google Drive**. The skills target **Grok Bot**: every specialist lists the exact Grok Bot tools it uses and maps them to concrete activities (see `tools/grok-bot.md`). On another host, swap in equivalent tools.
+
+## Tools by specialist (Grok Bot)
+
+| Specialist | Core tools |
+| --- | --- |
+| Chief UX Designer | `cursor.Task` (dispatch specialists), `TodoWrite`, Drive, Notion, Figma index, Slides review deck, GitHub handoff issues, `cursor-subscriptions` |
+| UX Writer | Figma read + `use_figma` text edits, Drive copy deck, Notion glossary, X vocabulary search, GitHub string files |
+| Motion Designer | `get_motion_context`, `use_figma` with `figma-use-motion`, `export_video`, Drive spec |
+| Illustrator | `search_design_system`, `use_figma` vectors, `generate_image` / Weave (paid), shaders, `upload_assets` / `download_assets` |
+| UI Designer | `create_session`, `search_design_system`, `use_figma`, `generate_figma_design`, `generate_diagram`, Code Connect, GitHub component reads |
+| UX Researcher | Drive, Notion meeting notes, Gmail feedback threads, GitHub issues, X social listening, WebSearch, FigJam affinity and journey maps, Slides readout |
+| Accessibility Specialist | `get_variable_defs` + `Google-slides.check_contrast`, `get_design_context`, `get_motion_context`, annotations via `use_figma`, WebFetch for WCAG, GitHub remediation issues |
+
+Outward actions (sending email, sharing files, filing issues, paid generation) always need the user's approval.
 
 ## Concept
 
@@ -42,7 +56,9 @@ There are **no separate** Interaction/Prototyping or Design Systems agents; thos
 ```text
 .
 ├── README.md
-├── specialists.manifest.yaml    # Registry + default enablement
+├── specialists.manifest.yaml    # Registry, defaults, tools, activities
+├── tools/
+│   └── grok-bot.md              # Grok Bot tool catalog, prerequisites, safety rules
 ├── onboarding/
 │   └── SKILL.md                 # First-time specialist selection
 ├── chief-ux-designer/
@@ -66,7 +82,7 @@ Each specialist folder contains:
 
 1. Clone this repo into your agent workspace (or install skills from it).
 2. Run the **onboarding** skill: `onboarding/SKILL.md`.
-3. Read `specialists.manifest.yaml` and persist your enabled specialist ids (see onboarding § What happens after selection).
+3. Read `specialists.manifest.yaml`, run the **tool readiness check** against your Grok Bot connections, and save the enabled specialist ids (see the onboarding skill).
 4. Configure your **Chief UX Designer** agent with `chief-ux-designer/SKILL.md`.
 5. Register each enabled specialist’s primary skill and listed sub-skills.
 
@@ -78,11 +94,16 @@ Each specialist folder contains:
    - Capabilities (link sub-skills)
    - Required inputs
    - Outputs / deliverables (point to `templates/`)
+   - **Tools on Grok Bot**: only tools listed in `tools/grok-bot.md`, with the required skills
+   - **Activities**: numbered steps, each naming the tools it calls
    - Quality criteria
    - Handoff to Chief UX Designer
 3. **Add sub-skills** under `specialists/<id>/skills/<capability>/SKILL.md` for distinct jobs.
 4. **Register** in `specialists.manifest.yaml`:
-   - `id`, `name`, `description`, `suggested`, `default_enabled`, `skill_path`, `sub_skills`
+   - `id`, `name`, `description`, `default_enabled`, `skill_path`, `sub_skills`
+   - `tools.required`, `tools.optional`, `tools.key`, `required_skills`, `activities`
+   - `paid_tools` / `approval_required` where they apply
+   - If the role needs a tool that isn't in the catalog, add it to `tools/grok-bot.md` first
 5. **Update this README** specialist table.
 6. **Extend Chief skill** — Add the role to briefing templates and reconciliation rules in `chief-ux-designer/SKILL.md` if the new role affects conflict patterns.
 
